@@ -93,6 +93,12 @@ export default function ProformaView({ dataset, onOpenStrategy, onOpenSimulator 
   const [copied, setCopied] = useState(false);
   const [isEscaleraModalOpen, setIsEscaleraModalOpen] = useState(false);
 
+  // 4. Datos del Asesor Comercial (para cierre y PDF)
+  const [asesorNombre, setAsesorNombre] = useState('Asesor Comercial FonBienes');
+  const [asesorTelefono, setAsesorTelefono] = useState('+51 999 999 999');
+  const [asesorEmail, setAsesorEmail] = useState('contacto@fonbienes.pe');
+  const [showAsesorModal, setShowAsesorModal] = useState(false);
+
   const selectedOperacion = useMemo(
     () => OPERACIONES.find((op) => op.id === operacionId) || OPERACIONES[0],
     [operacionId]
@@ -246,6 +252,17 @@ export default function ProformaView({ dataset, onOpenStrategy, onOpenSimulator 
               <span>{hasDiscount ? 'Inscripción: 50% Dscto. (2.36%)' : 'Inscripción: Regular (4.72%)'}</span>
             </button>
 
+            {/* Datos Asesor Modal Trigger */}
+            <button
+              type="button"
+              onClick={() => setShowAsesorModal(true)}
+              className="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-xs"
+              title="Personalizar datos del asesor comercial en la proforma PDF"
+            >
+              <User className="w-3.5 h-3.5 text-brand-600 dark:text-emerald-400" />
+              <span>Datos Asesor</span>
+            </button>
+
             <button
               type="button"
               onClick={handleCopyWhatsApp}
@@ -321,9 +338,9 @@ export default function ProformaView({ dataset, onOpenStrategy, onOpenSimulator 
       </div>
 
       {/* ========================================================================= */}
-      {/* HOJA OFICIAL DE PROFORMA FONBIENES (DISEÑO FIEL AL PDF + INTERACTIVO)     */}
+      {/* HOJA OFICIAL DE PROFORMA FONBIENES (VISTA PANTALLA WEB / INTERACTIVA)  */}
       {/* ========================================================================= */}
-      <div className="proforma-sheet bg-white dark:bg-[#0E171D] rounded-3xl border border-slate-200/90 dark:border-emerald-500/25 shadow-xl overflow-hidden print:shadow-none print:border-0 print:rounded-none">
+      <div className="proforma-sheet print:hidden bg-white dark:bg-[#0E171D] rounded-3xl border border-slate-200/90 dark:border-emerald-500/25 shadow-xl overflow-hidden">
         {/* 1. CABECERA INSTITUCIONAL VERDE FONBIENES */}
         <div className="bg-gradient-to-r from-[#057c3f] via-[#068846] to-[#046634] px-5 sm:px-8 py-5 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
           {/* Curva decorativa sutil estilo PDF */}
@@ -1184,6 +1201,603 @@ export default function ProformaView({ dataset, onOpenStrategy, onOpenSimulator 
       </div>
 
       {/* ========================================================================= */}
+      {/* ESTRUCTURA EXCLUSIVA DE IMPRESIÓN PDF A4 EN EXACTAMENTE 2 PÁGINAS        */}
+      {/* CERO REGRESIÓN VISUAL: hidden print:block print-document-root             */}
+      {/* ========================================================================= */}
+      <div className="hidden print:block print-document-root text-slate-900 bg-white">
+        {/* ===================================================================== */}
+        {/* HOJA 1: RESUMEN FINANCIERO Y CERTIFICADO                              */}
+        {/* ===================================================================== */}
+        <div className="print-page print-page-1 flex flex-col justify-between" style={{ minHeight: '268mm', maxHeight: '272mm' }}>
+          <div className="space-y-2.5">
+            {/* 1. Header Minimalista FonBienes */}
+            <div className="flex items-center justify-between border-b-2 border-[#057c3f] pb-2">
+              <div className="flex items-center gap-3">
+                <FonbienesLogo variant="color" className="h-9 w-auto" />
+                <div className="border-l-2 border-slate-200 pl-3">
+                  <span className="text-[10px] font-black tracking-widest text-[#057c3f] uppercase block">
+                    PLAN INMOBILIARIO FBP010
+                  </span>
+                  <span className="text-xs font-bold text-slate-700 block">
+                    Tu inversión inmobiliaria con cuotas a tu alcance y sin intereses
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                  FONBIENES PERÚ E.A.F.C. S.A.
+                </span>
+                <span className="text-[9px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  Supervisado por la SMV
+                </span>
+              </div>
+            </div>
+
+            {/* 2. Operaciones Inmobiliarias (3 columnas en 1 fila) */}
+            <div>
+              <div className="text-[10px] font-black uppercase tracking-wider text-slate-600 mb-1 text-center">
+                OPERACIONES INMOBILIARIAS
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {OPERACIONES.map((op) => {
+                  const isSelected = op.id === operacionId;
+                  const Icon = op.icon;
+                  return (
+                    <div
+                      key={op.id}
+                      className={`flex items-center gap-2 p-1.5 rounded-xl border text-left ${
+                        isSelected
+                          ? 'border-[#057c3f] bg-emerald-50/70 font-bold text-[#057c3f]'
+                          : 'border-slate-200 bg-slate-50/40 text-slate-500'
+                      }`}
+                    >
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                          isSelected ? 'bg-[#057c3f] text-white' : 'bg-slate-200 text-slate-600'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="block text-[8px] font-bold uppercase tracking-wider text-slate-500">
+                          {op.topLabel}
+                        </span>
+                        <span className="block text-[10px] font-extrabold leading-tight">
+                          {op.mainLabel}
+                        </span>
+                      </div>
+                      {isSelected && (
+                        <span className="w-4 h-4 rounded-full bg-[#057c3f] text-white flex items-center justify-center shrink-0 text-[10px]">
+                          ✓
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Información Personal (Tabla Compacta) */}
+            <div className="rounded-xl border border-slate-300 overflow-hidden">
+              <div className="bg-[#057c3f] text-white text-center py-1 px-3 text-[10px] font-extrabold uppercase tracking-wider">
+                INFORMACIÓN PERSONAL
+              </div>
+              <div className="p-2 grid grid-cols-12 gap-1.5 text-[11px]">
+                <div className="col-span-7 flex items-center gap-2 border-b border-slate-200 pb-1">
+                  <span className="font-extrabold text-[#01518c] uppercase shrink-0 text-[10px]">
+                    DATOS PERSONALES:
+                  </span>
+                  <span className="font-bold text-slate-900 truncate">
+                    {clienteNombre || 'Nombre y Apellidos del titular'}
+                  </span>
+                </div>
+                <div className="col-span-5 flex items-center gap-2 border-b border-slate-200 pb-1">
+                  <span className="font-extrabold text-[#01518c] uppercase shrink-0 text-[10px]">
+                    DNI / RUC:
+                  </span>
+                  <span className="font-bold text-slate-900 tabular-nums">
+                    {clienteDni || '—'}
+                  </span>
+                </div>
+                <div className="col-span-4 flex items-center gap-2 pt-0.5">
+                  <span className="font-extrabold text-[#01518c] uppercase shrink-0 text-[10px]">
+                    CELULAR:
+                  </span>
+                  <span className="font-bold text-slate-900 tabular-nums">
+                    {clienteCelular || '—'}
+                  </span>
+                </div>
+                <div className="col-span-3 flex items-center gap-2 pt-0.5">
+                  <span className="font-extrabold text-[#01518c] uppercase shrink-0 text-[10px]">
+                    FECHA:
+                  </span>
+                  <span className="font-bold text-slate-900 tabular-nums">
+                    {fechaProforma}
+                  </span>
+                </div>
+                <div className="col-span-5 flex items-center gap-2 pt-0.5">
+                  <span className="font-extrabold text-[#01518c] uppercase shrink-0 text-[10px]">
+                    PROGRAMA:
+                  </span>
+                  <span className="font-bold text-[#057c3f] truncate">
+                    Plan FBP010 · {plan.plazoMeses}m ({plan.plazosAnios}a)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Datos del Certificado (Monto + 3 Columnas Horizontales) */}
+            <div className="rounded-xl border-2 border-[#057c3f] overflow-hidden">
+              <div className="bg-[#057c3f] px-4 py-1.5 flex items-center justify-between text-white">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black uppercase tracking-wider">
+                    MONTO DE FINANCIAMIENTO
+                  </span>
+                  <span className="text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded">
+                    Certificado en Dólares (USD)
+                  </span>
+                </div>
+                <div className="text-base font-black tracking-wide tabular-nums bg-white/20 px-3 py-0.5 rounded-lg">
+                  $ {formatUsd(plan.certificadoUsd)} USD
+                </div>
+              </div>
+
+              {/* 3 Columnas Exactas en Fila Horizontal */}
+              <div className="grid grid-cols-3 divide-x divide-slate-200 bg-white">
+                {/* Col 1: Cuota Mensual */}
+                <div className="p-2 text-center flex flex-col justify-between bg-slate-50/50">
+                  <div className="text-[10px] font-black uppercase tracking-wider text-[#01518c]">
+                    A) CUOTA MENSUAL
+                  </div>
+                  <div className="my-1 text-xl font-black text-slate-900 tabular-nums">
+                    {formatUsd(plan.cuotaMensual, { decimals: 2 })}
+                  </div>
+                  <div className="text-[9px] text-slate-500 font-semibold">
+                    Cuota fija mensual ({plan.plazoMeses} meses)
+                  </div>
+                </div>
+
+                {/* Col 2: Inscripción / Membresía */}
+                <div className="p-2 text-center flex flex-col justify-between bg-slate-50/50">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#01518c]">
+                      B) INSCRIPCIÓN · MEMBRESÍA
+                    </span>
+                    {plan.hasDiscount && (
+                      <span className="px-1 py-0.2 rounded bg-emerald-100 text-emerald-800 text-[8px] font-black">
+                        50% DSCTO
+                      </span>
+                    )}
+                  </div>
+                  <div className="my-1 flex items-baseline justify-center gap-1.5">
+                    {plan.hasDiscount && (
+                      <span className="text-[11px] font-bold text-slate-400 line-through tabular-nums">
+                        {formatUsd(plan.inscripcionRegular, { decimals: 2 })}
+                      </span>
+                    )}
+                    <span className="text-xl font-black text-slate-900 tabular-nums">
+                      {formatUsd(plan.inscripcionEfectiva, { decimals: 2 })}
+                    </span>
+                  </div>
+                  <div className="text-[9px] text-slate-500">
+                    Pago único de ingreso ({plan.hasDiscount ? '2.36%' : '4.72%'} con IGV)
+                  </div>
+                </div>
+
+                {/* Col 3: Primer Pago */}
+                <div className="p-2 text-center flex flex-col justify-between bg-emerald-50/60">
+                  <div className="text-[10px] font-black uppercase tracking-wider text-[#057c3f]">
+                    A + B) PRIMER PAGO
+                  </div>
+                  <div className="my-1 text-xl font-black text-[#057c3f] tabular-nums">
+                    {formatUsd(plan.primerPago, { decimals: 2 })}
+                  </div>
+                  <div className="text-[9px] text-emerald-800 font-bold">
+                    {plan.hasDiscount
+                      ? `Sin dscto: ${formatUsd(plan.primerPagoSinDscto, { decimals: 2 })}`
+                      : 'Cuota 1 + Inscripción'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Análisis Financiero (Sobrecosto y Estructura Administrativa) */}
+            <div className="rounded-xl border border-slate-300 p-2.5 bg-slate-50/40 space-y-2">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-3.5 rounded-full bg-[#057c3f]" />
+                  <span className="text-xs font-black uppercase tracking-wider text-[#01518c]">
+                    COSTO FINANCIERO (EXPLICACIÓN SOBRECOSTO)
+                  </span>
+                </div>
+                <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-[#057c3f] border border-emerald-300">
+                  0% Interés Bancario
+                </span>
+              </div>
+
+              {/* Tabla de 5 filas de desglose de costo */}
+              <div className="space-y-1 text-[11px]">
+                <div className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-white border border-slate-200">
+                  <div className="font-bold text-slate-700 flex items-center gap-1.5">
+                    <span className="font-black text-[#057c3f] tabular-nums">{plan.plazoMeses}</span> MESES × {formatUsd(plan.cuotaMensual, { decimals: 2 })}
+                  </div>
+                  <div className="font-black text-slate-900 tabular-nums">
+                    = {formatUsd(plan.totalCuotas, { decimals: 2 })}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-white border border-slate-200">
+                  <div className="font-semibold text-slate-700 flex items-center gap-1.5">
+                    <span>(+) Membresía de Ingreso (Inscripción)</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-brand-50 text-brand-800">
+                      Pago Único {plan.hasDiscount ? '· 50% Dscto.' : ''}
+                    </span>
+                  </div>
+                  <div className="font-black text-slate-900 tabular-nums">
+                    = {formatUsd(plan.inscripcionEfectiva, { decimals: 2 })}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-slate-100 border border-slate-300">
+                  <span className="font-extrabold text-slate-800">
+                    (=) Total a devolver en {plan.plazosAnios} años
+                  </span>
+                  <div className="font-black text-slate-900 tabular-nums">
+                    = {formatUsd(plan.totalDevolver, { decimals: 2 })}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-white border border-slate-200">
+                  <span className="font-semibold text-slate-700">
+                    (−) Certificado(s) de compra (Capital recibido)
+                  </span>
+                  <div className="font-black text-[#057c3f] tabular-nums">
+                    = {formatUsd(plan.certificadoUsd, { decimals: 2 })}
+                  </div>
+                </div>
+
+                {/* Banner de Sobrecosto Total */}
+                <div className="py-1.5 px-3 rounded-xl bg-[#057c3f] text-white flex items-center justify-between gap-2">
+                  <div>
+                    <span className="font-black uppercase tracking-wider text-xs block">
+                      (=) SOBRECOSTO TOTAL ACUMULADO
+                    </span>
+                    <span className="text-[10px] text-emerald-100 block">
+                      Total en {plan.plazosAnios} años ({plan.costoPctCertificado}%) · Incluye Membresía + IGV (18%)
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-black tabular-nums block">
+                      {formatUsd(plan.costoTotal, { decimals: 2 })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estructura Administrativa en 2 columnas */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5 text-[10px]">
+                <div className="p-2 rounded-lg bg-white border border-slate-200">
+                  <div className="font-bold text-[#01518c] uppercase mb-0.5">
+                    Membresía Inicial (Pago Único)
+                  </div>
+                  <p className="text-slate-600 leading-tight">
+                    La inscripción de {formatUsd(plan.inscripcionEfectiva, { decimals: 2 })} USD ({plan.hasDiscount ? '2.36%' : '4.72%'} con IGV) es un único abono de afiliación. No constituye cargo mensual ni anual.
+                  </p>
+                </div>
+
+                <div className="p-2 rounded-lg bg-white border border-slate-200">
+                  <div className="font-bold text-[#057c3f] uppercase mb-0.5 flex items-center justify-between">
+                    <span>Gasto Administrativo en Cuotas</span>
+                    <span className="text-[9px] font-black bg-emerald-50 px-1 py-0.2 rounded text-emerald-800">
+                      ~1.64% anual sin IGV
+                    </span>
+                  </div>
+                  <p className="text-slate-600 leading-tight">
+                    Tasa contractual de 18% para todo el plazo ({plan.plazoMeses}m). Equivale a ~1.64% anual sin IGV (2.36% anual tasa global con IGV).
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-[9px] text-slate-500 italic text-center">
+                Nota: El 18% de IGV corresponde al tributo de ley aplicable. El costo administrativo neto del capital es de ~1.64% anual frente al 9.8% o más de TEA en banca tradicional.
+              </div>
+            </div>
+          </div>
+
+          {/* Pie de Página 1 */}
+          <div className="mt-2 bg-[#057c3f] text-white px-4 py-1.5 rounded-lg flex items-center justify-between text-[10px] font-bold">
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold">FonBienes Perú E.A.F.C. S.A.</span>
+              <span className="opacity-60">|</span>
+              <span>Más de 50 años en Latinoamérica</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span>RUC: 20523395701</span>
+              <span className="opacity-60">|</span>
+              <span className="bg-white/20 px-2 py-0.5 rounded font-black">Página 1 de 2</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ===================================================================== */}
+        {/* HOJA 2: MODALIDADES, ESCALERA Y ASESOR                                */}
+        {/* ===================================================================== */}
+        <div className="print-page print-page-2 flex flex-col justify-between" style={{ minHeight: '268mm', maxHeight: '272mm' }}>
+          <div className="space-y-2.5">
+            {/* 1. Header Minimalista FonBienes (Repetición Hoja 2) */}
+            <div className="flex items-center justify-between border-b-2 border-[#057c3f] pb-2">
+              <div className="flex items-center gap-3">
+                <FonbienesLogo variant="color" className="h-9 w-auto" />
+                <div className="border-l-2 border-slate-200 pl-3">
+                  <span className="text-[10px] font-black tracking-widest text-[#057c3f] uppercase block">
+                    MODALIDADES DE ADJUDICACIÓN Y PROGRESIÓN
+                  </span>
+                  <span className="text-xs font-bold text-slate-700 block">
+                    Mecánica de Sorteo y Remate · Dinámica Oficial del Grupo
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                  FONBIENES PERÚ E.A.F.C. S.A.
+                </span>
+                <span className="text-[9px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  Supervisado por la SMV
+                </span>
+              </div>
+            </div>
+
+            {/* 2. Dinámica de Modalidades de Adjudicación (2 Columnas en Paralelo) */}
+            <div>
+              <div className="text-[10px] font-black uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-2">
+                <span className="w-1.5 h-3.5 bg-[#057c3f] rounded-full" />
+                <span>MODALIDADES DE ADJUDICACIÓN</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-[11px]">
+                {/* Columna Izquierda: SORTEO */}
+                <div className="p-2.5 rounded-xl border border-slate-300 bg-slate-50/50 space-y-2 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                      <span className="font-black text-[#01518c] text-xs uppercase">
+                        1) SORTEO (Ahorro Programado)
+                      </span>
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                        0% Cuota Inicial
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-[10px] mt-1 leading-tight">
+                      Participas desde la asamblea 1 con tu cuota al día, sin necesidad de desembolsos de capital adicionales.
+                    </p>
+
+                    {/* Timeline de Sorteo */}
+                    <div className="my-2 p-2 rounded-lg bg-white border border-slate-200 text-center space-y-1">
+                      <div className="flex items-center justify-between text-[9px] font-bold text-slate-500">
+                        <span>Mes 1</span>
+                        <span className="text-[#057c3f] font-black">¡Adjudicado Mes {sorteoStats.mes}! Recibe {formatUsd(plan.certificadoUsd)}</span>
+                        <span>Mes {plan.plazoMeses}</span>
+                      </div>
+                      <div className="relative w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#057c3f]"
+                          style={{ width: `${sorteoStats.pctAvance}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 text-[10px]">
+                      <div className="flex justify-between py-0.5 border-b border-slate-200">
+                        <span className="text-slate-600">Aportado al mes {sorteoStats.mes}:</span>
+                        <span className="font-bold text-slate-900 tabular-nums">
+                          {formatUsd(sorteoStats.invertidoHastaSorteo, { decimals: 2 })}
+                        </span>
+                      </div>
+                      <div className="flex justify-between py-0.5 border-b border-slate-200">
+                        <span className="text-slate-600">Pendiente tras adjudicar:</span>
+                        <span className="font-bold text-slate-900 tabular-nums">
+                          {sorteoStats.mesesPendientes} cuotas de {formatUsd(plan.cuotaMensual, { decimals: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-1.5 rounded-lg bg-emerald-50 text-[10px] text-emerald-900 font-semibold border border-emerald-200 text-center">
+                    0% de intereses bancarios. Inversión 100% destinada a tu bien.
+                  </div>
+                </div>
+
+                {/* Columna Derecha: REMATE */}
+                <div className="p-2.5 rounded-xl border border-slate-300 bg-slate-50/50 space-y-2 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                      <span className="font-black text-[#057c3f] text-xs uppercase">
+                        2) REMATE (Aceleración)
+                      </span>
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-brand-50 text-brand-800 border border-brand-200">
+                        Adelanto de Cuotas
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-[10px] mt-1 leading-tight">
+                      Adelanto voluntario de cuotas solo si sales elegido ganador en la asamblea mensual.
+                    </p>
+
+                    {/* Ejemplo Seleccionado */}
+                    <div className="my-1.5 p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between">
+                      <span className="text-[10px] font-black text-slate-700">
+                        Ejemplo Seleccionado: <strong className="text-[#057c3f]">{cuotasRemate} Cuotas</strong>
+                      </span>
+                      <span className="text-xs font-black text-[#057c3f] tabular-nums">
+                        = {formatUsd(plan.desembolsoRemate, { decimals: 2 })}
+                      </span>
+                    </div>
+
+                    {/* Dos Opciones de Remate */}
+                    <div className="space-y-1">
+                      {/* Opción A */}
+                      <div className="p-1.5 rounded-lg bg-white border border-slate-200">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="font-bold text-slate-800">A) Reducir el plazo de pago:</span>
+                          <span className="text-[9px] font-black text-[#057c3f] bg-emerald-50 px-1.5 rounded">
+                            Terminas {plan.remateOpcionA.aniosAhorrados} años antes
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] mt-0.5">
+                          <span className="text-slate-500">Misma cuota: {formatUsd(plan.remateOpcionA.cuotaMensual, { decimals: 2 })}</span>
+                          <span className="font-black text-slate-900 tabular-nums">
+                            × {plan.remateOpcionA.mesesRestantes} meses pendientes
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Opción B */}
+                      <div className="p-1.5 rounded-lg bg-white border border-slate-200">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="font-bold text-slate-800">B) Reducir la cuota mensual:</span>
+                          <span className="text-[9px] font-black text-[#057c3f] bg-emerald-50 px-1.5 rounded">
+                            Baja -{formatUsd(plan.remateOpcionB.ahorroPorMes, { decimals: 2 })}/m
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] mt-0.5">
+                          <span className="text-slate-500">Nueva cuota: <strong className="text-[#057c3f] font-black">{formatUsd(plan.remateOpcionB.nuevaCuotaMensual, { decimals: 2 })}</strong></span>
+                          <span className="font-black text-slate-900 tabular-nums">
+                            × {plan.remateOpcionB.mesesPlazo} meses
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-[9px] text-slate-500 text-center italic">
+                    Modalidad a elección del asociado al adjudicar: Reducir Plazo (A) o Reducir Cuota (B).
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. La Escalera Descendente de Cuotas (5 Peldaños en Fila Horizontal) */}
+            <div className="rounded-xl border border-slate-300 p-2.5 bg-slate-50/40 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#057c3f] block">
+                    PROGRESIÓN DE ADJUDICACIÓN · COMPORTAMIENTO HISTÓRICO
+                  </span>
+                  <h4 className="text-xs font-black text-slate-900">
+                    La Escalera Descendente de Cuotas (Grupo de 396 contratos)
+                  </h4>
+                </div>
+                <span className="text-[9px] font-bold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-full">
+                  Salida progresiva de postores
+                </span>
+              </div>
+
+              {/* 5 Peldaños Horizontales */}
+              <div className="grid grid-cols-5 gap-1.5 text-center">
+                {FASES_ESCALERA.map((fase) => {
+                  const isSelected =
+                    cuotasRemate === fase.cuotasRef ||
+                    (cuotasRemate >= fase.minCuotas && cuotasRemate <= fase.maxCuotas);
+                  const desembolsoFase = fase.cuotasRef * plan.cuotaMensual;
+                  return (
+                    <div
+                      key={fase.id}
+                      className={`p-1.5 rounded-lg border text-center flex flex-col justify-between ${
+                        isSelected
+                          ? 'border-[#057c3f] bg-emerald-50 text-[#057c3f] shadow-xs'
+                          : 'border-slate-200 bg-white text-slate-700'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between text-[8px] font-bold mb-0.5">
+                          <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center font-black ${
+                            isSelected ? 'bg-[#057c3f] text-white' : 'bg-slate-200 text-slate-700'
+                          }`}>
+                            {fase.id}
+                          </span>
+                          <span className="text-slate-500 font-extrabold">{fase.rangoMeses}</span>
+                        </div>
+                        <div className="text-sm font-black tabular-nums text-slate-900">
+                          {fase.minCuotas}-{fase.maxCuotas}
+                        </div>
+                        <div className="text-[8px] font-black text-[#057c3f] uppercase">
+                          Cuotas
+                        </div>
+                      </div>
+
+                      <div className="pt-1 border-t border-slate-100 mt-1">
+                        <div className="text-[8px] text-slate-400 font-semibold">Ref. ~{fase.cuotasRef}c</div>
+                        <div className="text-[10px] font-black text-slate-900 tabular-nums">
+                          {formatUsd(desembolsoFase)}
+                        </div>
+                        {isSelected && (
+                          <div className="text-[8px] font-bold text-[#057c3f] mt-0.5">● Seleccionado</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Resumen de Dinámica del Grupo */}
+              <div className="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-[10px] text-slate-700">
+                <span>
+                  <strong>Dinámica del Grupo (396 contratos):</strong> Solo el 10% (~40 asociados) oferta en remate y únicamente ~10 a 12 superan las 20 cuotas. A medida que adjudican, el umbral de corte se reduce progresivamente.
+                </span>
+                <span className="font-bold text-[#057c3f] shrink-0 ml-2">
+                  Simulado: {cuotasRemate}c ({formatUsd(plan.desembolsoRemate)})
+                </span>
+              </div>
+            </div>
+
+            {/* 4. Datos del Asesor Comercial Asignado + Firma y Sello */}
+            <div className="rounded-xl border border-slate-300 p-2.5 bg-white grid grid-cols-12 gap-3 items-center">
+              <div className="col-span-7 space-y-1 text-[11px]">
+                <div className="text-[9px] font-black uppercase tracking-wider text-[#057c3f]">
+                  ASESOR COMERCIAL ASIGNADO
+                </div>
+                <div className="text-sm font-black text-slate-900">
+                  {asesorNombre || 'Asesor Comercial FonBienes'}
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-slate-600 font-semibold">
+                  <span>Tel / WhatsApp: <strong className="text-slate-900">{asesorTelefono || '+51 999 999 999'}</strong></span>
+                  <span>•</span>
+                  <span>Correo: <strong className="text-slate-900">{asesorEmail || 'contacto@fonbienes.pe'}</strong></span>
+                </div>
+                <div className="text-[9px] text-slate-500">
+                  Sede Central: Av. República de Panamá 3535, San Isidro, Lima - Perú
+                </div>
+              </div>
+
+              <div className="col-span-5 flex flex-col items-center justify-center text-center border-l border-slate-200 pl-3">
+                <div className="w-44 border-b-2 border-dashed border-slate-400 mt-4 mb-1" />
+                <span className="text-[10px] font-extrabold text-slate-800 uppercase tracking-wide">
+                  Firma y Sello del Asesor Comercial
+                </span>
+                <span className="text-[8px] text-slate-500">
+                  FonBienes Perú E.A.F.C. S.A. · Entidad Supervisada SMV
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Pie de Página 2 */}
+          <div className="mt-2 bg-[#057c3f] text-white px-4 py-1.5 rounded-lg flex items-center justify-between text-[10px] font-bold">
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold">FonBienes Perú</span>
+              <span className="opacity-60">|</span>
+              <span>Más de 50 años en Latinoamérica</span>
+              <span className="opacity-60">|</span>
+              <span>Supervisado por la SMV</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span>RUC: 20523395701</span>
+              <span className="opacity-60">|</span>
+              <span className="bg-white/20 px-2 py-0.5 rounded font-black">Página 2 de 2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
       {/* MODAL / PANTALLA AMPLIADA: LA ESCALERA DESCENDENTE EN GRANDE             */}
       {/* ========================================================================= */}
       {isEscaleraModalOpen && (
@@ -1354,6 +1968,90 @@ export default function ProformaView({ dataset, onOpenStrategy, onOpenSimulator 
                 className="px-5 py-2.5 rounded-xl bg-[#057c3f] hover:bg-[#046332] text-white text-xs sm:text-sm font-extrabold transition-all cursor-pointer shadow-sm self-end sm:self-auto"
               >
                 Listo / Volver a la Proforma
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PARA EDITAR DATOS DEL ASESOR COMERCIAL (PRINT:HIDDEN)              */}
+      {/* ========================================================================= */}
+      {showAsesorModal && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200 print:hidden"
+          onClick={() => setShowAsesorModal(false)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-white dark:bg-[#0B1319] rounded-3xl border border-slate-200 dark:border-emerald-500/30 shadow-2xl p-5 sm:p-7 space-y-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div>
+                <span className="text-xs font-black uppercase tracking-wider text-[#057c3f] dark:text-emerald-400">
+                  Personalización Comercial
+                </span>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                  Datos del Asesor (Hoja 2 PDF)
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAsesorModal(false)}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs sm:text-sm">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 dark:text-slate-300">
+                  Nombre Completo del Asesor:
+                </label>
+                <input
+                  type="text"
+                  value={asesorNombre}
+                  onChange={(e) => setAsesorNombre(e.target.value)}
+                  placeholder="Ej. Juan Pérez - Asesor Senior"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-[#057c3f]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 dark:text-slate-300">
+                  Teléfono / WhatsApp de Contacto:
+                </label>
+                <input
+                  type="text"
+                  value={asesorTelefono}
+                  onChange={(e) => setAsesorTelefono(e.target.value)}
+                  placeholder="Ej. +51 987 654 321"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-[#057c3f]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 dark:text-slate-300">
+                  Correo Electrónico Institucional:
+                </label>
+                <input
+                  type="email"
+                  value={asesorEmail}
+                  onChange={(e) => setAsesorEmail(e.target.value)}
+                  placeholder="Ej. jperez@fonbienes.pe"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-[#057c3f]"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowAsesorModal(false)}
+                className="px-5 py-2 rounded-xl bg-[#057c3f] hover:bg-[#046332] text-white font-bold text-xs sm:text-sm cursor-pointer shadow-sm transition-all"
+              >
+                Guardar y Cerrar
               </button>
             </div>
           </div>

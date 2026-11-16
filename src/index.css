@@ -169,11 +169,13 @@ html.dark input[type='range'].rams-slider::-moz-range-thumb {
   scrollbar-width: none;
 }
 
-/* Official A4 Proforma Print Styles */
+/* ========================================================================= */
+/* CONFIGURACIÓN EXCLUSIVA DE IMPRESIÓN PDF A4 EN EXACTAMENTE 2 PÁGINAS      */
+/* ========================================================================= */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 8mm;
+    margin: 12mm;
   }
 
   html,
@@ -183,14 +185,69 @@ html.dark input[type='range'].rams-slider::-moz-range-thumb {
     background: #ffffff !important;
     background-image: none !important;
     color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  .proforma-sheet {
-    box-shadow: none !important;
-    border: 1px solid #cbd5e1 !important;
+  /* Ocultar elementos de navegación y pantalla */
+  header,
+  nav,
+  .print-hidden,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .proforma-page-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Contenedores de página A4 exacta */
+  .print-document-root {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-page {
+    width: 100% !important;
+    box-sizing: border-box !important;
     background: #ffffff !important;
     color: #0f172a !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-page-1 {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  .print-page-2 {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Forzar colores exactos en impresión */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
